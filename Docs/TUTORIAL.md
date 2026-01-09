@@ -9,11 +9,15 @@
 2. [.ts vs .tsx 파일](#2-ts-vs-tsx-파일)
 3. [TypeScript 기본 문법](#3-typescript-기본-문법)
 4. [React 기초](#4-react-기초)
-5. [Next.js 구조](#5-nextjs-구조)
-6. [MVVM 패턴](#6-mvvm-패턴)
-7. [실전 예제: QR코드 생성기](#7-실전-예제-qr코드-생성기)
-8. [Tailwind CSS 기초](#8-tailwind-css-기초)
-9. [자주 쓰는 패턴 모음](#9-자주-쓰는-패턴-모음)
+5. [React 심화 - Hooks](#5-react-심화---hooks)
+6. [Next.js 구조](#6-nextjs-구조)
+7. [MVVM 패턴](#7-mvvm-패턴)
+8. [실전 예제: QR코드 생성기](#8-실전-예제-qr코드-생성기)
+9. [실전 예제: 이미지 변환기](#9-실전-예제-이미지-변환기)
+10. [Canvas API 기초](#10-canvas-api-기초)
+11. [파일 처리 패턴](#11-파일-처리-패턴)
+12. [Tailwind CSS 기초](#12-tailwind-css-기초)
+13. [자주 쓰는 패턴 모음](#13-자주-쓰는-패턴-모음)
 
 ---
 
@@ -689,7 +693,124 @@ const props = { title: '제목', description: '설명' };
 
 ---
 
-## 5. Next.js 구조
+## 5. React 심화 - Hooks
+
+### 5.1 useCallback (함수 메모이제이션)
+
+함수를 메모리에 저장해서 불필요한 재생성 방지
+
+```tsx
+import { useCallback } from 'react';
+
+function ImageConverter() {
+  const [state, setState] = useState({...});
+
+  // ❌ 매번 새 함수 생성 (컴포넌트 렌더링마다)
+  const setFormat = (format: string) => {
+    setState(prev => ({ ...prev, format }));
+  };
+
+  // ✅ useCallback으로 감싸면 한 번만 생성
+  const setFormat = useCallback((format: string) => {
+    setState(prev => ({ ...prev, format }));
+  }, []);  // 의존성 배열
+}
+```
+
+#### 의존성 배열
+
+```tsx
+// 의존성 없음 - 함수가 한 번만 생성됨
+const handleClick = useCallback(() => {
+  console.log('클릭');
+}, []);
+
+// 의존성 있음 - originalSize가 바뀔 때만 함수 재생성
+const setWidth = useCallback((width: number) => {
+  const ratio = originalSize.height / originalSize.width;
+  setState(prev => ({ ...prev, width, height: width * ratio }));
+}, [originalSize]);
+```
+
+### 5.2 useRef (DOM 접근 & 값 유지)
+
+```tsx
+import { useRef } from 'react';
+
+function FileUploader() {
+  // DOM 요소 참조
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    // hidden input을 코드로 클릭
+    inputRef.current?.click();
+  };
+
+  return (
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <button onClick={handleButtonClick}>파일 선택</button>
+    </div>
+  );
+}
+```
+
+### 5.3 초기 상태 분리 패턴
+
+```tsx
+// ❌ 나쁜 예: 같은 값을 두 번 작성
+const [state, setState] = useState({
+  text: '',
+  size: 300,
+  error: null,
+});
+
+const clear = () => {
+  setState({
+    text: '',      // 중복!
+    size: 300,     // 중복!
+    error: null,   // 중복!
+  });
+};
+
+// ✅ 좋은 예: 상수로 분리
+const initialState = {
+  text: '',
+  size: 300,
+  error: null,
+};
+
+const [state, setState] = useState(initialState);
+
+const clear = () => {
+  setState(initialState);  // 한 줄로 끝!
+};
+```
+
+### 5.4 prev 패턴 (이전 상태 기반 업데이트)
+
+```tsx
+// ❌ 나쁜 예: 현재 state 직접 참조
+const increment = () => {
+  setState({ ...state, count: state.count + 1 });
+  // 연속 호출 시 문제 발생 가능
+};
+
+// ✅ 좋은 예: prev 콜백 사용
+const increment = () => {
+  setState(prev => ({ ...prev, count: prev.count + 1 }));
+  // 항상 최신 상태 기반으로 업데이트
+};
+```
+
+---
+
+## 6. Next.js 구조
 
 ### 5.1 App Router (폴더 = URL)
 
@@ -840,9 +961,9 @@ import { Button } from '@/components/ui/button';
 
 ---
 
-## 6. MVVM 패턴
+## 7. MVVM 패턴
 
-### 6.1 MVVM이란?
+### 7.1 MVVM이란?
 
 코드를 역할별로 분리하는 설계 패턴
 
@@ -857,7 +978,7 @@ Model ←→ ViewModel ←→ View
 | **ViewModel** | 상태 관리, 비즈니스 로직 | `viewmodels/` |
 | **View** | UI 렌더링 | `app/`, `components/` |
 
-### 6.2 왜 MVVM을 쓸까?
+### 7.2 왜 MVVM을 쓸까?
 
 ```
 ❌ 모든 코드가 한 파일에 → 유지보수 어려움
@@ -868,7 +989,7 @@ Model ←→ ViewModel ←→ View
    - 데이터 바꿀 때 → Model만 수정
 ```
 
-### 6.3 React에서 MVVM 구현
+### 7.3 React에서 MVVM 구현
 
 ```
 View        = React 컴포넌트 (.tsx)
@@ -876,7 +997,7 @@ ViewModel   = Custom Hook (useXXX.ts)
 Model       = Interface, 데이터 (.ts)
 ```
 
-### 6.4 Custom Hook이란?
+### 7.4 Custom Hook이란?
 
 로직을 재사용 가능하게 분리한 함수 (use로 시작)
 
@@ -902,9 +1023,9 @@ function QrPage() {
 
 ---
 
-## 7. 실전 예제: QR코드 생성기
+## 8. 실전 예제: QR코드 생성기
 
-### 7.1 전체 구조
+### 8.1 전체 구조
 
 ```
 models/
@@ -924,7 +1045,7 @@ app/tools/qr/
 └── page.tsx               ← View (페이지)
 ```
 
-### 7.2 Model - 타입 정의
+### 8.2 Model - 타입 정의
 
 ```ts
 // models/types/qr.ts
@@ -941,7 +1062,7 @@ export interface QrGeneratorState {
 }
 ```
 
-### 7.3 ViewModel - 비즈니스 로직
+### 8.3 ViewModel - 비즈니스 로직
 
 ```ts
 // viewmodels/useQrGenerator.ts
@@ -1040,7 +1161,7 @@ export function useQrGenerator() {
 }
 ```
 
-### 7.4 View - 재사용 컴포넌트
+### 8.4 View - 재사용 컴포넌트
 
 ```tsx
 // components/tools/qr/ColorPicker.tsx
@@ -1076,7 +1197,7 @@ export function ColorPicker({ label, value, onChange }: ColorPickerProps) {
 }
 ```
 
-### 7.5 View - 페이지 조합
+### 8.5 View - 페이지 조합
 
 ```tsx
 // app/tools/qr/page.tsx
@@ -1122,7 +1243,7 @@ export default function QrGeneratorPage() {
 }
 ```
 
-### 7.6 데이터 흐름 정리
+### 8.6 데이터 흐름 정리
 
 ```
 1. 사용자가 텍스트 입력
@@ -1144,9 +1265,346 @@ export default function QrGeneratorPage() {
 
 ---
 
-## 8. Tailwind CSS 기초
+## 9. 실전 예제: 이미지 변환기
 
-### 8.1 클래스로 스타일 적용
+### 9.1 전체 구조
+
+```
+models/
+├── types/
+│   └── image.ts              ← Model (타입)
+
+viewmodels/
+└── useImageConverter.ts      ← ViewModel (로직)
+
+components/tools/image/
+├── ImageUploader.tsx         ← View (업로드 UI)
+├── ImageSettings.tsx         ← View (설정 UI)
+├── ImagePreview.tsx          ← View (미리보기)
+└── ImageActions.tsx          ← View (버튼)
+
+app/tools/image/
+└── page.tsx                  ← View (페이지)
+```
+
+### 9.2 Model - 타입 정의
+
+```ts
+// models/types/image.ts
+export interface ImageConverterState {
+  originalFile: File | null;       // 원본 파일
+  originalUrl: string | null;      // 미리보기 URL
+  resultUrl: string | null;        // 변환 결과 URL
+
+  format: 'png' | 'jpeg' | 'webp'; // 출력 포맷
+  quality: number;                 // 품질 (1~100)
+
+  width: number;                   // 너비
+  height: number;                  // 높이
+  keepAspectRatio: boolean;        // 비율 유지
+
+  rotation: 0 | 90 | 180 | 270;    // 회전
+  flipHorizontal: boolean;         // 좌우 반전
+  flipVertical: boolean;           // 상하 반전
+
+  borderRadius: number;            // 둥근 모서리
+  removeExif: boolean;             // EXIF 제거
+
+  error: string | null;            // 에러 메시지
+  isProcessing: boolean;           // 처리 중
+}
+```
+
+### 9.3 ViewModel 핵심 로직
+
+```ts
+// viewmodels/useImageConverter.ts (핵심 부분)
+
+// 초기 상태 분리 (재사용 가능)
+const initialState: ImageConverterState = {
+  originalFile: null,
+  format: 'png',
+  quality: 90,
+  // ...
+};
+
+export function useImageConverter() {
+  const [state, setState] = useState(initialState);
+  const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+
+  // 파일 업로드
+  const setFile = useCallback((file: File) => {
+    const url = URL.createObjectURL(file);  // 미리보기 URL 생성
+
+    const img = new Image();
+    img.onload = () => {
+      setOriginalSize({ width: img.naturalWidth, height: img.naturalHeight });
+      setState(prev => ({
+        ...prev,
+        originalFile: file,
+        originalUrl: url,
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      }));
+    };
+    img.src = url;
+  }, []);
+
+  // 이미지 변환 (Canvas 사용)
+  const convert = useCallback(async () => {
+    // ... Canvas로 이미지 변환 로직
+  }, [state]);
+
+  // 초기화
+  const clear = useCallback(() => {
+    if (state.originalUrl) {
+      URL.revokeObjectURL(state.originalUrl);  // 메모리 정리
+    }
+    setState(initialState);
+  }, [state.originalUrl]);
+
+  return { state, setFile, convert, clear, /* ... */ };
+}
+```
+
+---
+
+## 10. Canvas API 기초
+
+### 10.1 Canvas란?
+
+HTML5에서 그래픽을 그리는 도구. 이미지 편집에 필수!
+
+```tsx
+// Canvas 생성
+const canvas = document.createElement('canvas');
+canvas.width = 800;
+canvas.height = 600;
+
+// Context 가져오기 (그리기 도구)
+const ctx = canvas.getContext('2d');
+```
+
+### 10.2 이미지 그리기
+
+```tsx
+const img = new Image();
+img.onload = () => {
+  // 기본 그리기
+  ctx.drawImage(img, 0, 0);
+
+  // 크기 조절해서 그리기
+  ctx.drawImage(img, 0, 0, 400, 300);  // x, y, width, height
+
+  // 일부분만 잘라서 그리기
+  ctx.drawImage(img,
+    50, 50, 100, 100,   // 원본에서 자를 영역
+    0, 0, 200, 200      // 캔버스에 그릴 영역
+  );
+};
+img.src = imageUrl;
+```
+
+### 10.3 변환 (Transform)
+
+```tsx
+// 이동 (translate)
+ctx.translate(100, 50);  // x, y만큼 이동
+
+// 회전 (rotate) - 라디안 단위!
+ctx.rotate(Math.PI / 2);       // 90도
+ctx.rotate(90 * Math.PI / 180); // 90도 (공식)
+
+// 크기/반전 (scale)
+ctx.scale(2, 2);     // 2배 확대
+ctx.scale(-1, 1);    // 좌우 반전
+ctx.scale(1, -1);    // 상하 반전
+
+// 중심 기준 회전 패턴
+ctx.translate(canvas.width / 2, canvas.height / 2);  // 중심으로 이동
+ctx.rotate(90 * Math.PI / 180);                       // 회전
+ctx.drawImage(img, -img.width / 2, -img.height / 2); // 중심 맞춰 그리기
+```
+
+### 10.4 클리핑 (마스킹)
+
+```tsx
+// 둥근 모서리 적용
+ctx.beginPath();
+ctx.roundRect(0, 0, width, height, 20);  // 둥근 사각형 경로
+ctx.clip();  // 이 영역만 보이게
+
+ctx.drawImage(img, 0, 0);  // 둥근 모서리로 잘림
+```
+
+### 10.5 이미지로 내보내기
+
+```tsx
+// Data URL로 변환
+const pngUrl = canvas.toDataURL('image/png');
+const jpgUrl = canvas.toDataURL('image/jpeg', 0.9);  // 품질 0~1
+const webpUrl = canvas.toDataURL('image/webp', 0.8);
+
+// Blob으로 변환 (파일 업로드용)
+canvas.toBlob((blob) => {
+  const file = new File([blob], 'image.png', { type: 'image/png' });
+}, 'image/png');
+```
+
+---
+
+## 11. 파일 처리 패턴
+
+### 11.1 파일 선택 (input)
+
+```tsx
+function FileInput() {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    console.log(file.name);  // 파일명
+    console.log(file.size);  // 크기 (bytes)
+    console.log(file.type);  // MIME 타입 (image/png 등)
+  };
+
+  return (
+    <input
+      type="file"
+      accept="image/*"  // 이미지만 허용
+      onChange={handleChange}
+    />
+  );
+}
+```
+
+### 11.2 드래그 앤 드롭
+
+```tsx
+function DropZone({ onFileSelect }: Props) {
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();  // 필수!
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.dataTransfer.files[0];
+    if (file) onFileSelect(file);
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      className="border-2 border-dashed p-8"
+    >
+      파일을 여기에 드롭하세요
+    </div>
+  );
+}
+```
+
+### 11.3 클립보드 붙여넣기
+
+```tsx
+function PasteArea({ onFileSelect }: Props) {
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const file = e.clipboardData.files[0];
+    if (file) onFileSelect(file);
+  };
+
+  return (
+    <div onPaste={handlePaste} tabIndex={0}>
+      Ctrl+V로 이미지를 붙여넣으세요
+    </div>
+  );
+}
+```
+
+### 11.4 URL.createObjectURL / revokeObjectURL
+
+```tsx
+function ImagePreview() {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleFileSelect = (file: File) => {
+    // 이전 URL 정리 (메모리 누수 방지)
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    // 새 URL 생성
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+  };
+
+  // 컴포넌트 언마운트 시 정리
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  return previewUrl ? <img src={previewUrl} /> : null;
+}
+```
+
+### 11.5 이미지 크기 읽기
+
+```tsx
+function getImageSize(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);  // 정리
+      resolve({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('이미지 로드 실패'));
+    };
+
+    img.src = url;
+  });
+}
+
+// 사용
+const size = await getImageSize(file);
+console.log(size.width, size.height);
+```
+
+### 11.6 다운로드 트리거
+
+```tsx
+function downloadImage(dataUrl: string, filename: string) {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// 사용
+downloadImage(canvas.toDataURL('image/png'), 'result.png');
+```
+
+---
+
+## 12. Tailwind CSS 기초
+
+### 12.1 클래스로 스타일 적용
 
 ```tsx
 <div className="p-4 bg-white rounded-lg shadow">
@@ -1155,7 +1613,7 @@ export default function QrGeneratorPage() {
 </div>
 ```
 
-### 8.2 간격 (Spacing)
+### 12.2 간격 (Spacing)
 
 ```
 p-{숫자}   padding (전체)
@@ -1171,7 +1629,7 @@ mt, mr, mb, ml  각 방향
 숫자: 1=0.25rem, 2=0.5rem, 4=1rem, 8=2rem, 12=3rem...
 ```
 
-### 8.3 글자 스타일
+### 12.3 글자 스타일
 
 ```
 text-xs, text-sm, text-base, text-lg, text-xl, text-2xl, text-3xl, text-4xl
@@ -1180,7 +1638,7 @@ text-left, text-center, text-right
 text-gray-500, text-red-500, text-blue-500...
 ```
 
-### 8.4 배경색
+### 12.4 배경색
 
 ```
 bg-white, bg-black
@@ -1188,7 +1646,7 @@ bg-gray-100, bg-gray-200... bg-gray-900
 bg-red-500, bg-blue-500, bg-green-500...
 ```
 
-### 8.5 레이아웃
+### 12.5 레이아웃
 
 ```tsx
 {/* Flexbox */}
@@ -1205,7 +1663,7 @@ bg-red-500, bg-blue-500, bg-green-500...
 <div className="grid md:grid-cols-2">   {/* 반응형: 기본 1열, md 이상 2열 */}
 ```
 
-### 8.6 테두리, 그림자
+### 12.6 테두리, 그림자
 
 ```
 border              테두리
@@ -1217,7 +1675,7 @@ shadow              그림자
 shadow-lg           큰 그림자
 ```
 
-### 8.7 반응형 디자인
+### 12.7 반응형 디자인
 
 ```tsx
 <div className="
@@ -1234,7 +1692,7 @@ shadow-lg           큰 그림자
 {/* xl: 1280px 이상 */}
 ```
 
-### 8.8 상태 스타일
+### 12.8 상태 스타일
 
 ```tsx
 <button className="
@@ -1246,7 +1704,7 @@ shadow-lg           큰 그림자
 ">
 ```
 
-### 8.9 자주 쓰는 조합
+### 12.9 자주 쓰는 조합
 
 ```tsx
 {/* 카드 */}
@@ -1264,9 +1722,9 @@ shadow-lg           큰 그림자
 
 ---
 
-## 9. 자주 쓰는 패턴 모음
+## 13. 자주 쓰는 패턴 모음
 
-### 9.1 로딩 상태 처리
+### 13.1 로딩 상태 처리
 
 ```tsx
 function DataList() {
@@ -1289,7 +1747,7 @@ function DataList() {
 }
 ```
 
-### 9.2 에러 처리
+### 13.2 에러 처리
 
 ```tsx
 function Form() {
@@ -1314,7 +1772,7 @@ function Form() {
 }
 ```
 
-### 9.3 토글 패턴
+### 13.3 토글 패턴
 
 ```tsx
 function Toggle() {
@@ -1331,7 +1789,7 @@ function Toggle() {
 }
 ```
 
-### 9.4 입력값 처리
+### 13.4 입력값 처리
 
 ```tsx
 function SearchInput() {
@@ -1356,7 +1814,7 @@ function SearchInput() {
 }
 ```
 
-### 9.5 파일 업로드
+### 13.5 파일 업로드
 
 ```tsx
 function FileUpload() {
@@ -1389,7 +1847,7 @@ function FileUpload() {
 
 ---
 
-## 10. 정리
+## 14. 정리
 
 ### 파일별 역할
 

@@ -1,23 +1,23 @@
 //설정 카드
- import { Button } from '@/components/ui/button';
-  import { Input } from '@/components/ui/input';
-  import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-  import { ColorPicker } from './ColorPicker';
-  import { RangeSlider } from './RangeSlider';
-  import { QrGeneratorState } from '@/models/types/qr';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ColorPicker } from './ColorPicker';
+import { RangeSlider } from './RangeSlider';
+import { QrGeneratorState } from '@/models/types/qr';
 
-  interface QrSettingsCardProps {
-    state: QrGeneratorState;
-    onTextChange: (text: string) => void;
-    onFgColorChange: (color: string) => void;
-    onBgColorChange: (color: string) => void;
-    onSizeChange: (size: number) => void;
-    onMarginChange: (margin: number) => void;
-    onLogoChange: (file: File | null) => void;
-    onErrorLevelChange: (level: 'L' | 'M' | 'Q' | 'H') => void;
-    onGenerate: () => void;
-    onClear: () => void;
-  }
+interface QrSettingsCardProps {
+  state: QrGeneratorState;
+  onTextChange: (text: string) => void;
+  onFgColorChange: (color: string) => void;
+  onBgColorChange: (color: string) => void;
+  onSizeChange: (size: number) => void;
+  onMarginChange: (margin: number) => void;
+  onLogoChange: (file: File | null) => void;
+  onErrorLevelChange: (level: 'L' | 'M' | 'Q' | 'H') => void;
+  onGenerate: () => void;
+  onClear: () => void;
+}
 
   export function QrSettingsCard({
     state,

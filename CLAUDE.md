@@ -99,8 +99,10 @@ D:\reden\
 │   ├── globals.css           # 전역 스타일
 │   ├── tools/                # 온라인 도구
 │   │   ├── page.tsx          # 도구 목록 페이지
-│   │   └── qr/
-│   │       └── page.tsx      # QR코드 생성기
+│   │   ├── qr/
+│   │   │   └── page.tsx      # QR코드 생성기
+│   │   └── image/
+│   │       └── page.tsx      # 이미지 변환기
 │   ├── dev/                  # 개발자 도구
 │   └── calc/                 # 계산기
 │
@@ -108,23 +110,32 @@ D:\reden\
 │   ├── common/               # 공통 컴포넌트
 │   │   └── ToolCard.tsx      # 도구 카드
 │   ├── tools/                # 도구별 컴포넌트
-│   │   └── qr/
-│   │       ├── QrSettingsCard.tsx
-│   │       ├── QrResultCard.tsx
-│   │       ├── ColorPicker.tsx
-│   │       └── RangeSlider.tsx
+│   │   ├── qr/
+│   │   │   ├── QrSettingsCard.tsx
+│   │   │   ├── QrResultCard.tsx
+│   │   │   ├── ColorPicker.tsx
+│   │   │   └── RangeSlider.tsx
+│   │   └── image/
+│   │       ├── ImageUploader.tsx
+│   │       ├── ImageSettings.tsx
+│   │       ├── ImagePreview.tsx
+│   │       └── ImageActions.tsx
 │   └── ui/                   # shadcn/ui 컴포넌트
 │
 ├── viewmodels/               # ViewModel (커스텀 훅)
-│   └── useQrGenerator.ts
+│   ├── useQrGenerator.ts
+│   └── useImageConverter.ts
 │
 ├── models/                   # Model
 │   ├── types/                # TypeScript 타입 정의
 │   │   ├── qr.ts
+│   │   ├── image.ts
 │   │   └── tool.ts
 │   └── data/                 # 정적 데이터
 │       └── tools.ts          # 도구 목록 데이터
 │
+├── docs/                     # 문서
+│   └── TUTORIAL.md           # TypeScript/Next.js 교육 문서
 ├── lib/                      # shadcn/ui 유틸
 ├── public/                   # 정적 파일
 ├── android/                  # Capacitor Android (예정)
@@ -136,8 +147,7 @@ D:\reden\
 
 ### 1. 온라인 도구 (/tools)
 - [x] QR코드 생성기
-- [ ] 이미지 리사이즈
-- [ ] 이미지 압축
+- [x] 이미지 변환기 (리사이즈, 압축, 회전 통합)
 - [ ] 바코드 생성기
 - [ ] PDF 합치기/나누기
 
@@ -180,15 +190,42 @@ D:\reden\
 - [ ] 히스토리 저장
 - [ ] 템플릿 저장
 
+## 이미지 변환기 기능
+
+### 현재 구현 (풀버전)
+- 포맷 변환 (PNG, JPEG, WEBP)
+- 리사이즈 (너비/높이 픽셀 지정)
+- 품질/압축 조절 (1~100%)
+- 비율 유지 옵션
+- 회전 (0°, 90°, 180°, 270°)
+- 좌우/상하 반전
+- 둥근 모서리
+- EXIF 데이터 제거
+- SNS 프리셋 (인스타, 유튜브, 트위터, 페북)
+- 드래그 앤 드롭 업로드
+- 클립보드 붙여넣기 (Ctrl+V)
+- 원본/결과 미리보기
+
+### 향후 추가 기능 (예정)
+- [ ] HEIC → JPG 변환 (아이폰 사진)
+- [ ] 배경 제거 (AI)
+- [ ] 워터마크 삽입
+- [ ] 배치 처리 (여러 이미지)
+- [ ] 크롭 (자르기)
+- [ ] 필터/효과
+
 ## 현재 진행 상황
 - [x] 프로젝트 생성 (D:\reden)
 - [x] layout.tsx - 헤더/푸터 완성
 - [x] page.tsx - 메인 홈페이지 완성
 - [x] MVVM 폴더 구조 생성
-- [x] shadcn/ui 설치 (button, input, card, textarea)
+- [x] shadcn/ui 설치 (button, input, card, textarea, checkbox, slider)
 - [x] QR코드 생성기 구현 (MVVM)
-- [🔨] 도구 목록 페이지 (/tools) - 진행 중
-- [ ] 다른 도구 추가 (이미지 리사이즈, JSON 포맷터 등)
+- [x] 도구 목록 페이지 (/tools) 완성
+- [x] TypeScript/Next.js 교육 문서 작성
+- [x] GitHub 업로드 및 Vercel 배포
+- [x] 이미지 변환기 구현 (MVVM)
+- [ ] 다른 도구 추가 (JSON 포맷터, 바코드 등)
 - [ ] Capacitor 설정
 - [ ] AdSense 연동
 - [ ] Figma 디자인 작업 (추후)
@@ -201,10 +238,10 @@ D:\reden\
 - 디자인은 기능 완성 후 Figma로 정리 예정
 
 ## 다음 할 일
-1. 도구 목록 페이지 완성 (/tools, /dev, /calc)
-2. 다른 도구 추가 (이미지 리사이즈, JSON 포맷터)
-3. Capacitor 초기 설정
-4. AdSense 준비
+1. 개발자 도구 페이지 (/dev) - JSON 포맷터
+2. 계산기 페이지 (/calc) - 환율 계산기
+3. Capacitor 초기 설정 (앱 배포)
+4. AdSense 연동
 
 ## 트러블슈팅 기록
 | 문제 | 원인 | 해결 |

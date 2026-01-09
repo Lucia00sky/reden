@@ -15,10 +15,10 @@ export const toolsList: Tool[] = [
       id: 'image-resize',
       title: '이미지 리사이즈',
       description: '이미지 크기 조절',
-      href: '/tools/image-resize',
+      href: '/tools/image',
       icon: '🖼️',
       category: 'tools',
-      isReady: false,
+      isReady: true,
     },
     {
       id: 'image-compress',
