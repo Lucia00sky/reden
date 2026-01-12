@@ -61,6 +61,15 @@ export const toolsList: Tool[] = [
 
     // 계산기
     {
+      id: 'salary',
+      title: '연봉 실수령액',
+      description: '4대보험, 세금 공제 후 실수령액',
+      href: '/calc/salary',
+      icon: '💰',
+      category: 'calc',
+      isReady: true,
+    },
+    {
       id: 'calculator',
       title: '환율 계산기',
       description: '실시간 환율 계산',
